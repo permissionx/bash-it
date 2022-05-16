@@ -1,3 +1,5 @@
+Forked from [Bash-it/bash-it](https://github.com/Bash-it/bash-it)
+
 ![logo](https://github.com/Bash-it/media/raw/master/media/Bash-it.png)
 
 ![Build Status](../../../workflows/CI/badge.svg?event=push)
