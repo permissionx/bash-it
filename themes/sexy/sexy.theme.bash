@@ -7,7 +7,7 @@
 #       export SEXY_THEME_SHOW_PYTHON=true
 
 # Default setting
-SEXY_THEME_SHOW_PYTHON="${SEXY_THEME_SHOW_PYTHON:=false}"
+SEXY_THEME_SHOW_PYTHON="${SEXY_THEME_SHOW_PYTHON:=true}"
 
 if tput setaf 1 &> /dev/null; then
     if [[ $(tput colors) -ge 256 ]] 2>/dev/null; then

@@ -81,9 +81,7 @@ debug() {
 
 CURRENT_BG='NONE'
 CURRENT_RBG='NONE'
-#SEGMENT_SEPARATOR=''
-#SEGMENT_SEPARATOR=''
-SEGMENT_SEPARATOR='' #e0c0 fire
+SEGMENT_SEPARATOR=''
 RIGHT_SEPARATOR=''
 LEFT_SUBSEG=''
 RIGHT_SUBSEG=''
@@ -234,7 +232,7 @@ prompt_context() {
     local user=`whoami`
 
     if [[ $user != $DEFAULT_USER || -n $SSH_CLIENT ]]; then
-        prompt_segment blue default "🚀 $user@\h"
+        prompt_segment red default "$user@\h"
     fi
 }
 
@@ -337,7 +335,6 @@ prompt_right_segment() {
 
     debug "Prompt right"
     debug "Prompting $1 $2 $3"
-    echo "$1"
 
     # if commented out from kruton's original... I'm not clear
     # if it did anything, but it messed up things like
@@ -405,7 +402,7 @@ prompt_emacsdir() {
 
 build_prompt() {
     [[ ! -z ${AG_EMACS_DIR+x} ]] && prompt_emacsdir
-    #prompt_status
+    prompt_status
     #[[ -z ${AG_NO_HIST+x} ]] && prompt_histdt
     [[ -z ${AG_NO_CONTEXT+x} ]] && prompt_context
     prompt_condaenv
@@ -431,23 +428,10 @@ set_bash_prompt() {
     # uncomment below to use right prompt
     #     PS1='\[$(tput sc; printf "%*s" $COLUMNS "$PRIGHT"; tput rc)\]'$PR
     #PS1="┏"$PR"\n┗"
-    #PS1=$yellow"╭"$PR"\n"$yellow"╰"$white
+    PS1=$white"┏"$PR"\n┗🚀🚀🚀\t⚡⚡⚡\n"$orange"→"$white
 
-    time=$(date | awk '{print $4}')
-
-    PR=$blue""$PR
-    PR=$(printf "%*s\r%s\n" "$(tput cols)" "🌞$time" "$PR")
-   
-    #PS1=$red""$PSx"\n"$green"•"$white
-
-    PS1=$PR"\n"$white"•"$white
-
-
-
-    ##PS1=$PR
+    #PS1=$PR
     # 💖🎶😉🎉🎂😁❤❤😍😒👌😘🤷‍♂️🤦‍♀️🙌💕🤞😉😎🎶😢💖🐱‍👤🤳🎂🎉👏🐱‍🐉😃🎁🤢🤔😆💕
 }
 
 PROMPT_COMMAND=set_bash_prompt
-
-
