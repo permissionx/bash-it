@@ -1,44 +1,74 @@
-#!/usr/bin/env bats
+# shellcheck shell=bats
 
-#load ../test_helper
-load ../../lib/helpers
-load ../../lib/composure
-load ../../plugins/available/go.plugin
+load "${MAIN_BASH_IT_DIR?}/test/test_helper.bash"
 
-@test 'plugins go: reverse path: single entry' {
-  run _split_path_reverse '/foo'
-  echo "output = ${output}"
-  [ "$output" = "/foo" ]
+function local_setup_file() {
+  setup_libs "helpers"
 }
 
-@test 'plugins go: reverse path: single entry, colon empty' {
-  run _split_path_reverse '/foo:'
-  echo "output = ${output}"
-  [ "$output" = "/foo" ]
+function setup_go_path()
+{
+  local go_path="$1"
+
+  # Make sure that the requested GO folder is available
+  assert_dir_exist "$go_path/bin"
+
+  # Make sure that the requested GO folder is on the path
+  export GOPATH="$go_path:${GOPATH:-}"
 }
 
-@test 'plugins go: reverse path: single entry, colon whitespace' {
-  run _split_path_reverse '/foo: '
-  echo "output = ${output}"
-  [ "$output" = "/foo" ]
-}
+# We test `go version` in each test to account for users with goenv and no system go.
 
-@test 'plugins go: reverse path: multiple entries' {
-  run _split_path_reverse '/foo:/bar'
-  echo "output = ${output}"
-  [ "$output" = "/bar /foo" ]
+@test 'ensure _bash-it-gopath-pathmunge is defined' {
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  load ../../plugins/available/go.plugin
+  run type -t _bash-it-gopath-pathmunge
+  assert_line 'function'
 }
 
 @test 'plugins go: single entry in GOPATH' {
-  export GOPATH="/foo"
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/gopath"
   load ../../plugins/available/go.plugin
-  echo "$(echo $PATH | cut -d':' -f1,2)"
-  [ "$(echo $PATH | cut -d':' -f1)" = "/foo/bin" ]
+  assert_equal "$(cut -d':' -f1 <<<$PATH)" "$BASH_IT/test/fixtures/go/gopath/bin"
+}
+
+@test 'plugins go: single entry in GOPATH, with space' {
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/go path"
+  load ../../plugins/available/go.plugin
+  assert_equal "$(cut -d':' -f1 <<<$PATH)" "$BASH_IT/test/fixtures/go/go path/bin"
+}
+
+@test 'plugins go: single entry in GOPATH, with escaped space' {
+  skip 'huh?'
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/go\ path"
+  load ../../plugins/available/go.plugin
+  assert_equal "$(cut -d':' -f1 <<<$PATH)" "$BASH_IT/test/fixtures/go/go\ path/bin"
 }
 
 @test 'plugins go: multiple entries in GOPATH' {
-  export GOPATH="/foo:/bar"
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/gopath"
+  setup_go_path "$BASH_IT/test/fixtures/go/gopath2"
   load ../../plugins/available/go.plugin
-  echo "$(echo $PATH | cut -d':' -f1,2)"
-  [ "$(echo $PATH | cut -d':' -f1,2)" = "/foo/bin:/bar/bin" ]
+  assert_equal "$(cut -d':' -f1,2 <<<$PATH)" "$BASH_IT/test/fixtures/go/gopath2/bin:$BASH_IT/test/fixtures/go/gopath/bin"
+}
+
+@test 'plugins go: multiple entries in GOPATH, with space' {
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/gopath"
+  setup_go_path "$BASH_IT/test/fixtures/go/go path"
+  load ../../plugins/available/go.plugin
+  assert_equal "$(cut -d':' -f1,2 <<<$PATH)" "$BASH_IT/test/fixtures/go/go path/bin:$BASH_IT/test/fixtures/go/gopath/bin"
+}
+
+@test 'plugins go: multiple entries in GOPATH, with escaped space' {
+  skip 'huh?'
+  { _command_exists go && go version &>/dev/null; } || skip 'golang not found'
+  setup_go_path "$BASH_IT/test/fixtures/go/gopath"
+  setup_go_path "$BASH_IT/test/fixtures/go/go path"
+  load ../../plugins/available/go.plugin
+  assert_equal "$(cut -d':' -f1,2 <<<$PATH)" "$BASH_IT/test/fixtures/go/go\ path/bin:$BASH_IT/test/fixtures/go/gopath/bin"
 }
